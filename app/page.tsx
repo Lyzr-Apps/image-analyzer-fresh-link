@@ -218,46 +218,70 @@ export default function Home() {
       )
 
       console.log('Agent Response:', result)
+      console.log('Normalized Response:', result.response)
       setRawResponse(JSON.stringify(result, null, 2))
 
       if (result.success) {
-        // The response is already normalized by the API route
         const normalized = result.response
 
-        // Check if it has the expected structure
+        // Try multiple paths to extract the data
+        let finalResult: AnalysisResult | null = null
+
+        // Path 1: Check if it's already in the correct format (result.data structure)
         if (normalized.result?.data) {
-          // Already in the correct format
-          setAnalysisResult(normalized as AnalysisResult)
-        } else if (normalized.result) {
-          // Try to map the result to our expected structure
-          const mappedResult: AnalysisResult = {
-            status: normalized.status || 'success',
-            result: {
-              summary: normalized.result.summary || normalized.message || 'Image analysis completed',
-              data: {
-                scene_description: normalized.result.scene_description || normalized.result.data?.scene_description || '',
-                objects_detected: Array.isArray(normalized.result.objects_detected)
-                  ? normalized.result.objects_detected
-                  : normalized.result.data?.objects_detected || [],
-                text_extracted: normalized.result.text_extracted || normalized.result.data?.text_extracted || '',
-                color_analysis: {
-                  dominant_colors: normalized.result.color_analysis?.dominant_colors || normalized.result.data?.color_analysis?.dominant_colors || []
-                },
-                mood_and_context: {
-                  emotional_tone: normalized.result.mood_and_context?.emotional_tone || normalized.result.data?.mood_and_context?.emotional_tone || '',
-                  suggested_use_cases: normalized.result.mood_and_context?.suggested_use_cases || normalized.result.data?.mood_and_context?.suggested_use_cases || []
+          finalResult = normalized as AnalysisResult
+        }
+        // Path 2: Check if data is at the top level of result
+        else if (normalized.result) {
+          const res = normalized.result
+
+          // Check if the fields are directly in result (no nested data object)
+          if (res.scene_description || res.objects_detected || res.color_analysis || res.mood_and_context) {
+            finalResult = {
+              status: normalized.status || 'success',
+              result: {
+                summary: res.summary || normalized.message || 'Image analysis completed',
+                data: {
+                  scene_description: res.scene_description || '',
+                  objects_detected: Array.isArray(res.objects_detected) ? res.objects_detected : [],
+                  text_extracted: res.text_extracted || '',
+                  color_analysis: {
+                    dominant_colors: res.color_analysis?.dominant_colors || []
+                  },
+                  mood_and_context: {
+                    emotional_tone: res.mood_and_context?.emotional_tone || '',
+                    suggested_use_cases: Array.isArray(res.mood_and_context?.suggested_use_cases)
+                      ? res.mood_and_context.suggested_use_cases
+                      : []
+                  }
                 }
+              },
+              metadata: normalized.metadata || {
+                agent_name: 'Image Analyzer Agent',
+                timestamp: new Date().toISOString()
               }
-            },
-            metadata: normalized.metadata || {
-              agent_name: 'Image Analyzer Agent',
-              timestamp: new Date().toISOString()
             }
           }
-          setAnalysisResult(mappedResult)
+          // Path 3: Check if entire result is the data object
+          else if (res.summary && res.data) {
+            finalResult = {
+              status: normalized.status || 'success',
+              result: res,
+              metadata: normalized.metadata || {
+                agent_name: 'Image Analyzer Agent',
+                timestamp: new Date().toISOString()
+              }
+            } as AnalysisResult
+          }
+        }
+
+        if (finalResult) {
+          console.log('Mapped Result:', finalResult)
+          setAnalysisResult(finalResult)
         } else {
-          // Fallback: treat entire result as text
-          setError('Received unexpected response format. Check debug view for details.')
+          // Show what we got for debugging
+          console.error('Could not map response:', normalized)
+          setError('Could not parse agent response. Enable debug view to see raw response.')
           setShowDebug(true)
         }
       } else {
@@ -621,11 +645,24 @@ export default function Home() {
         {showDebug && rawResponse && (
           <Card className="border-border mt-6 bg-card/50">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium tracking-wide">Debug: Raw Agent Response</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium tracking-wide">Debug: Raw Agent Response</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(rawResponse)
+                  }}
+                  className="h-8 text-xs"
+                >
+                  <Copy className="w-3 h-3 mr-1" />
+                  Copy
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[300px]">
-                <pre className="text-xs font-mono bg-secondary/50 p-4 rounded-sm overflow-x-auto">
+              <ScrollArea className="h-[400px]">
+                <pre className="text-xs font-mono bg-secondary/50 p-4 rounded-sm overflow-x-auto whitespace-pre-wrap break-words">
                   {rawResponse}
                 </pre>
               </ScrollArea>
