@@ -93,6 +93,8 @@ export default function Home() {
   const [isDragging, setIsDragging] = useState(false)
   const [copiedText, setCopiedText] = useState(false)
   const [useSampleData, setUseSampleData] = useState(false)
+  const [showDebug, setShowDebug] = useState(false)
+  const [rawResponse, setRawResponse] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const sampleResult: AnalysisResult = {
@@ -210,17 +212,60 @@ export default function Home() {
       }
 
       const result = await callAIAgent(
-        'Analyze this image and provide a comprehensive breakdown including objects, text, colors, and context.',
+        'Analyze this image and provide a comprehensive breakdown in JSON format with these sections: scene_description (string), objects_detected (array of {object, confidence}), text_extracted (string), color_analysis ({dominant_colors: array of {color_name, hex_code}}), and mood_and_context ({emotional_tone, suggested_use_cases array}). Return as: {status: "success", result: {summary: string, data: {...}}, metadata: {agent_name, timestamp}}',
         AGENT_ID,
         { assets: uploadResult.asset_ids }
       )
 
+      console.log('Agent Response:', result)
+      setRawResponse(JSON.stringify(result, null, 2))
+
       if (result.success) {
-        setAnalysisResult(result.response as AnalysisResult)
+        // The response is already normalized by the API route
+        const normalized = result.response
+
+        // Check if it has the expected structure
+        if (normalized.result?.data) {
+          // Already in the correct format
+          setAnalysisResult(normalized as AnalysisResult)
+        } else if (normalized.result) {
+          // Try to map the result to our expected structure
+          const mappedResult: AnalysisResult = {
+            status: normalized.status || 'success',
+            result: {
+              summary: normalized.result.summary || normalized.message || 'Image analysis completed',
+              data: {
+                scene_description: normalized.result.scene_description || normalized.result.data?.scene_description || '',
+                objects_detected: Array.isArray(normalized.result.objects_detected)
+                  ? normalized.result.objects_detected
+                  : normalized.result.data?.objects_detected || [],
+                text_extracted: normalized.result.text_extracted || normalized.result.data?.text_extracted || '',
+                color_analysis: {
+                  dominant_colors: normalized.result.color_analysis?.dominant_colors || normalized.result.data?.color_analysis?.dominant_colors || []
+                },
+                mood_and_context: {
+                  emotional_tone: normalized.result.mood_and_context?.emotional_tone || normalized.result.data?.mood_and_context?.emotional_tone || '',
+                  suggested_use_cases: normalized.result.mood_and_context?.suggested_use_cases || normalized.result.data?.mood_and_context?.suggested_use_cases || []
+                }
+              }
+            },
+            metadata: normalized.metadata || {
+              agent_name: 'Image Analyzer Agent',
+              timestamp: new Date().toISOString()
+            }
+          }
+          setAnalysisResult(mappedResult)
+        } else {
+          // Fallback: treat entire result as text
+          setError('Received unexpected response format. Check debug view for details.')
+          setShowDebug(true)
+        }
       } else {
         setError(result.error || 'Failed to analyze image')
+        setShowDebug(true)
       }
     } catch (err) {
+      console.error('Analysis error:', err)
       setError(err instanceof Error ? err.message : 'An error occurred during analysis')
     } finally {
       setIsAnalyzing(false)
@@ -270,14 +315,25 @@ export default function Home() {
             <h1 className="text-3xl font-semibold tracking-wide leading-relaxed">Image Analyzer</h1>
             <p className="text-muted-foreground text-sm mt-1">Upload an image to analyze objects, text, colors, and context</p>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Sample Data</span>
-            <button
-              onClick={() => setUseSampleData(!useSampleData)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-sm transition-colors ${useSampleData ? 'bg-primary' : 'bg-input'}`}
-            >
-              <span className={`inline-block h-4 w-4 transform rounded-sm bg-background transition-transform ${useSampleData ? 'translate-x-6' : 'translate-x-1'}`} />
-            </button>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">Debug View</span>
+              <button
+                onClick={() => setShowDebug(!showDebug)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-sm transition-colors ${showDebug ? 'bg-primary' : 'bg-input'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-sm bg-background transition-transform ${showDebug ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">Sample Data</span>
+              <button
+                onClick={() => setUseSampleData(!useSampleData)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-sm transition-colors ${useSampleData ? 'bg-primary' : 'bg-input'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-sm bg-background transition-transform ${useSampleData ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -560,6 +616,22 @@ export default function Home() {
             )}
           </div>
         </div>
+
+        {/* Debug Panel */}
+        {showDebug && rawResponse && (
+          <Card className="border-border mt-6 bg-card/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium tracking-wide">Debug: Raw Agent Response</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[300px]">
+                <pre className="text-xs font-mono bg-secondary/50 p-4 rounded-sm overflow-x-auto">
+                  {rawResponse}
+                </pre>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Agent Status */}
         <Card className="border-border mt-8 bg-card/50">

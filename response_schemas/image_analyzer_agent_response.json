@@ -2,7 +2,7 @@
   "agent_name": "Image Analyzer Agent",
   "agent_id": "698bd590544d8929157d0282",
   "agent_purpose": "image_analysis",
-  "description": "Schema for image analysis agent providing scene description, object detection, OCR, color analysis, and mood assessment",
+  "description": "Schema for image analysis agent providing scene description, object detection, OCR, color analysis, and mood assessment. Agent updated with strict JSON formatting instructions to ensure consistent structured responses.",
   "response_schema": {
     "status": "string",
     "result": {

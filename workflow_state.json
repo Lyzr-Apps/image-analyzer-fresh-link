@@ -15,7 +15,7 @@
       },
       "test_status": "passed",
       "test_timestamp": "2026-02-11T01:05:00.841648",
-      "test_notes": "Vision agent tested - schema documented from configuration. Agent correctly prompts for image upload when no image provided."
+      "test_notes": "Vision agent tested - schema documented from configuration. Agent correctly prompts for image upload when no image provided. UPDATED 2026-02-11: Enhanced with strict JSON formatting instructions to ensure consistent structured responses."
     }
   ],
   "knowledge_bases": [],
