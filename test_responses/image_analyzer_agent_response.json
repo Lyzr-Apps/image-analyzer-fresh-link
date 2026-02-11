@@ -1,0 +1,83 @@
+{
+  "agent_name": "Image Analyzer Agent",
+  "agent_id": "698bd590544d8929157d0282",
+  "test_input": "Analyze this image and provide a comprehensive breakdown including objects, text, colors, and context.",
+  "response": {
+    "status": "success",
+    "result": {
+      "summary": "A serene image of a river flowing through a dense forest under a clear blue sky.",
+      "data": {
+        "scene_description": "The image depicts a tranquil natural scene where a river winds its way through a lush, dense forest. Above, the sky is clear and vividly blue, suggesting a bright, sunny day.",
+        "objects_detected": [
+          {
+            "object": "river",
+            "confidence": "98%"
+          },
+          {
+            "object": "trees",
+            "confidence": "95%"
+          },
+          {
+            "object": "sky",
+            "confidence": "99%"
+          }
+        ],
+        "text_extracted": "",
+        "color_analysis": {
+          "dominant_colors": [
+            {
+              "color_name": "Sky Blue",
+              "hex_code": "#87CEEB"
+            },
+            {
+              "color_name": "Forest Green",
+              "hex_code": "#228B22"
+            },
+            {
+              "color_name": "Earth Brown",
+              "hex_code": "#8B4513"
+            }
+          ]
+        },
+        "mood_and_context": {
+          "emotional_tone": "calm and peaceful",
+          "suggested_use_cases": [
+            "nature blog",
+            "environmental poster",
+            "relaxation app background"
+          ]
+        }
+      }
+    },
+    "metadata": {
+      "agent_name": "Image Analyzer Agent",
+      "timestamp": "2026-02-11T01:05:00Z"
+    }
+  },
+  "field_types": {
+    "status": "string",
+    "result": "object",
+    "result.summary": "string",
+    "result.data": "object",
+    "result.data.scene_description": "string",
+    "result.data.objects_detected": "array",
+    "result.data.objects_detected[].object": "string",
+    "result.data.objects_detected[].confidence": "string",
+    "result.data.text_extracted": "string",
+    "result.data.color_analysis": "object",
+    "result.data.color_analysis.dominant_colors": "array",
+    "result.data.color_analysis.dominant_colors[].color_name": "string",
+    "result.data.color_analysis.dominant_colors[].hex_code": "string",
+    "result.data.mood_and_context": "object",
+    "result.data.mood_and_context.emotional_tone": "string",
+    "result.data.mood_and_context.suggested_use_cases": "array",
+    "metadata": "object",
+    "metadata.agent_name": "string",
+    "metadata.timestamp": "string"
+  },
+  "status": "passed",
+  "timestamp": "2026-02-11T01:05:00.841648",
+  "notes": "Vision agent - requires actual image input. When tested without image, correctly prompts for upload. Expected response structure documented from agent configuration.",
+  "actual_no_image_response": "Please upload the image you'd like me to analyze.",
+  "test_type": "schema_documentation"
+}

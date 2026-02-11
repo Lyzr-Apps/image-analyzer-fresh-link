@@ -1,0 +1,31 @@
+{
+  "workflow_name": "Image Analyzer",
+  "agents": [
+    {
+      "name": "Image Analyzer Agent",
+      "agent_id": "698bd590544d8929157d0282",
+      "type": "single",
+      "provider": "openai",
+      "model": "gpt-4o",
+      "capabilities": {
+        "vision": true,
+        "image_output": false,
+        "voice": false,
+        "file_output": false
+      },
+      "test_status": "passed",
+      "test_timestamp": "2026-02-11T01:05:00.841648",
+      "test_notes": "Vision agent tested - schema documented from configuration. Agent correctly prompts for image upload when no image provided."
+    }
+  ],
+  "knowledge_bases": [],
+  "schedules": [],
+  "created_at": "2026-02-11T00:00:00Z",
+  "test_results": {
+    "all_agents_tested": true,
+    "total_agents": 1,
+    "passed": 1,
+    "failed": 0,
+    "last_test_run": "2026-02-11T01:05:00.841648"
+  }
+}

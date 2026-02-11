@@ -1,0 +1,99 @@
+{
+  "agent_name": "Image Analyzer Agent",
+  "agent_id": "698bd590544d8929157d0282",
+  "agent_purpose": "image_analysis",
+  "description": "Schema for image analysis agent providing scene description, object detection, OCR, color analysis, and mood assessment",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "summary": "string",
+      "data": {
+        "scene_description": "string",
+        "objects_detected": [
+          {
+            "object": "string",
+            "confidence": "string"
+          }
+        ],
+        "text_extracted": "string",
+        "color_analysis": {
+          "dominant_colors": [
+            {
+              "color_name": "string",
+              "hex_code": "string"
+            }
+          ]
+        },
+        "mood_and_context": {
+          "emotional_tone": "string",
+          "suggested_use_cases": [
+            "string"
+          ]
+        }
+      }
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string"
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "summary": "A serene image of a river flowing through a dense forest under a clear blue sky.",
+      "data": {
+        "scene_description": "The image depicts a tranquil natural scene where a river winds its way through a lush, dense forest. Above, the sky is clear and vividly blue, suggesting a bright, sunny day.",
+        "objects_detected": [
+          {
+            "object": "river",
+            "confidence": "98%"
+          },
+          {
+            "object": "trees",
+            "confidence": "95%"
+          },
+          {
+            "object": "sky",
+            "confidence": "99%"
+          }
+        ],
+        "text_extracted": "",
+        "color_analysis": {
+          "dominant_colors": [
+            {
+              "color_name": "Sky Blue",
+              "hex_code": "#87CEEB"
+            },
+            {
+              "color_name": "Forest Green",
+              "hex_code": "#228B22"
+            },
+            {
+              "color_name": "Earth Brown",
+              "hex_code": "#8B4513"
+            }
+          ]
+        },
+        "mood_and_context": {
+          "emotional_tone": "calm and peaceful",
+          "suggested_use_cases": [
+            "nature blog",
+            "environmental poster",
+            "relaxation app background"
+          ]
+        }
+      }
+    },
+    "metadata": {
+      "agent_name": "Image Analyzer Agent",
+      "timestamp": "2023-10-12T15:30:00Z"
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-11T01:05:00.842146",
+  "test_message_used": "Hello, provide a sample response",
+  "actual_test_response": {
+    "raw_text": "Please upload the image you'd like me to analyze."
+  },
+  "test_passed": false
+}
